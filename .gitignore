@@ -1,0 +1,12 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Google API Credentials (NEVER UPLOAD THESE)
+credentials.json
+token.json
+
+# Local Data Backup
+Fitness_Takip_v1_Backup.zip
+data.json
