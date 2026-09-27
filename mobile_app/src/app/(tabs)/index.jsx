@@ -18,7 +18,7 @@ export default function TodayScreen() {
       if (!data || !data.workouts) return [];
       let upcoming = [];
       let idx = data.next_workout_idx || 0;
-      for(let i=0; i<3; i++) {
+      for(let i=0; i<4; i++) {
           upcoming.push(data.workouts[idx % data.workouts.length]);
           idx++;
       }
@@ -123,7 +123,7 @@ export default function TodayScreen() {
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>🔮 Sıradaki Antrenmanlar</Text>
-        <Text style={styles.label}>Önümüzdeki 3 antrenman planınız:</Text>
+        <Text style={styles.label}>Önümüzdeki 4 antrenman planınız:</Text>
         <View style={styles.upcomingRow}>
             {upcomingWorkouts.map((w, i) => (
                 <View key={i} style={styles.upcomingBadge}>
