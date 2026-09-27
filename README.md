@@ -1,27 +1,46 @@
-# Fitness Takip
+﻿# Fitness Takip Projesi 🏋️‍♂️📱
 
-Kişisel antrenman programını takip etmeni ve Google Takvim ile otomatik senkronize etmeni sağlayan Python (Streamlit) tabanlı bir web uygulaması.
+Bu proje, kişisel antrenman programınızı ve istatistiklerinizi hem bilgisayardan (web) hem de cebinizden (mobil) eşzamanlı olarak takip edebilmeniz için geliştirilmiş uçtan uca modern bir sistemdir.
 
-## Özellikler
+## 🏗️ Proje Mimarisi
 
-* **2 İdman, 1 Dinlenme Döngüsü:** Uygulama, antrenman günlerini ve dinlenme günlerini otomatik olarak bu döngüye göre planlar.
-* **Seri (Streak) Takibi:** Kaç gün arka arkaya antrenman yaptığını ve maksimum serini hesaplar.
-* **Eksik Antrenman Bildirimi:** Geçmişte yapılması gereken ancak işaretlenmeyen antrenmanlar için kullanıcıyı uyarır ve takvimi buna göre yeniden düzenler.
-* **Google Takvim Senkronizasyonu:** Gelecek 90 günlük idman takvimini otomatik olarak Google Takvim'ine (başlangıç ve bitiş saatleriyle birlikte) ekler.
-* **Aylık Takvim Görünümü:** Streamlit arayüzünde geçmiş ve gelecek tüm antrenmanları görselleştirir.
-* **İstatistikler:** Son 30 gün ve 1 yıl içindeki antrenman başarı oranlarını gösterir.
+Sistem 3 ana bileşenden oluşmaktadır ve tüm verileriniz merkezi tek bir beyin olan data.json dosyasında tutulur. Bu sayede hiçbir senkronizasyon sorunu yaşanmaz:
 
-## Kurulum ve Çalıştırma
+1. **Web Dashboard (Streamlit - pp.py):** Bilgisayarınız üzerinden tüm istatistiklerinizi görebileceğiniz, programı yönetebileceğiniz ve döngünüzü düzenleyebileceğiniz zengin masaüstü arayüzü.
+2. **Yerel API Sunucusu (FastAPI - pi.py):** Mobil uygulamanın bilgisayarınızdaki data.json dosyasına yerel ağ (Wi-Fi) üzerinden güvenle erişip verileri okuma/yazma yapmasını sağlayan köprü sistem.
+3. **Mobil Uygulama (React Native Expo - mobile_app/):** Telefonunuzdan idmanlarınızı anlık olarak işaretleyebileceğiniz, serinizi (streak) ve ilerlemenizi görebileceğiniz son derece şık ve "Hepsi Bir Arada" sekme yapısına sahip mobil arayüz.
 
-1. Gerekli kütüphaneleri yükleyin:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. Uygulamayı çalıştırın:
-   ```bash
-   streamlit run app.py
-   ```
+## ✨ Temel Özellikler
 
-## Notlar
+* **Algoritmik 10 Günlük Döngü:** Belirlediğiniz 7 antrenman günü, bilimsel bir yaklaşımla (2 idman, 1 dinlenme, 2 idman, 1 dinlenme, 3 idman, 1 dinlenme) otomatik olarak 10 günlük dinlenme planına yayılır.
+* **Modüler Düzenleme:** Antrenman sıralamanızı ve isimlerini her iki platformdan da dilediğiniz gibi güncelleyebilirsiniz.
+* **Akıllı Takas (Swap) Sistemi:** Eğer o gün programdaki idman yerine döngüdeki başka bir idmanı yaparsanız (örneğin göğüs yerine bacak), sistem bu iki idmanın yerini otomatik olarak değiştirerek gelecek planınızı korur.
+* **İstatistik ve Motivasyon:** Seriniz (Streak), en uzun seriniz (Rekor), son 30 günlük ve son 1 yıllık başarı oranlarınız yüzdelik ilerleme çubuklarıyla tutulur.
+* **Gelişmiş Takvim:** Yeşil (tamamlanan) ve Kırmızı Nokta (planlanan) işaretlemeleriyle geçmiş ve gelecek idman programınızı takvim üzerinden anlık görebilirsiniz.
 
-Bu proje, kişisel verileri gizli tutmak amacıyla `data.json`, `credentials.json` ve `token.json` dosyalarını GitHub'a yüklememek üzere `.gitignore` ile yapılandırılmıştır. Uygulamanın çalışması için kendi Google Cloud Console projenizden OAuth Client ID oluşturup klasöre `credentials.json` olarak kaydetmeniz gerekmektedir.
+## 🚀 Kurulum ve Çalıştırma
+
+### 1. Web Uygulamasını Çalıştırma (Bilgisayar İçin)
+Uygulama dizinindeyken terminalinizde aşağıdaki komutu çalıştırarak masaüstü arayüzüne ulaşabilirsiniz:
+`ash
+streamlit run app.py
+`
+
+### 2. API Sunucusunu Çalıştırma (Mobil Uygulamanın Veri Alabilmesi İçin)
+Mobil uygulamanın bilgisayarınızdaki verileri çekebilmesi için arka planda köprü API'sini başlatmanız gerekir:
+`ash
+python api.py
+`
+*(Sunucu yerel ağınızda 8000 portu üzerinden yayın yapmaya başlayacaktır).*
+
+### 3. Mobil Uygulamayı Çalıştırma (Telefon İçin)
+Terminalde yeni bir sekme açıp mobil uygulama klasörüne girin ve projeyi başlatın:
+`ash
+cd mobile_app
+npm start
+`
+*(Alternatif olarak 
+pm.cmd start yazabilirsiniz).*
+
+Ardından Android telefonunuza kurduğunuz **Expo Go** uygulaması ile bilgisayar ekranınızda çıkan QR kodu okutmanız yeterlidir. 
+**Önemli Not:** Telefonunuzun ve bilgisayarınızın aynı Wi-Fi ağına bağlı olması gerekmektedir.
