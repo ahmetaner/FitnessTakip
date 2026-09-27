@@ -298,17 +298,19 @@ def main():
     st.subheader("🗓️ Mevcut İdman Döngüsü (10 Günlük Plan)")
     st.write("Döngünüz **2 idman-1 dinlenme, 2 idman-1 dinlenme, 3 idman-1 dinlenme** kuralına göre aşağıdaki gibi tam 10 günde bir başa sarar:")
     
-    cycle_cols = st.columns(5)
-    day = 1
+    row1 = st.columns(5)
+    row2 = st.columns(5)
     w_idx = 0
     for i in range(10):
-        col = cycle_cols[i % 5]
+        day = i + 1
+        col = row1[i] if i < 5 else row2[i - 5]
+        
         if i in [2, 5, 9]:
-            col.info(f"**Gün {day}**: 🛋️ Dinlenme")
+            col.info(f"**Gün {day}**\n\n🛋️ Dinlenme")
         else:
-            col.success(f"**Gün {day}**: 🏋️ {WORKOUTS[w_idx % len(WORKOUTS)]}")
+            col.success(f"**Gün {day}**\n\n🏋️ {WORKOUTS[w_idx % len(WORKOUTS)]}")
             w_idx += 1
-        day += 1
+
 
 
 if __name__ == "__main__":
