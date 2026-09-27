@@ -1,4 +1,4 @@
-﻿# Fitness Takip Projesi 🏋️‍♂️📱
+# Fitness Takip Projesi 🏋️‍♂️📱
 
 Bu proje, kişisel antrenman programınızı ve istatistiklerinizi hem bilgisayardan (web) hem de cebinizden (mobil) eşzamanlı olarak takip edebilmeniz için geliştirilmiş uçtan uca modern bir sistemdir.
 
