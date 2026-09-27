@@ -1,5 +1,5 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import React, { useContext, useState, useEffect, useMemo } from 'react';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Image } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { DataContext } from '../../contexts/DataContext';
 
@@ -8,10 +8,21 @@ export default function TodayScreen() {
   const [actualWorkout, setActualWorkout] = useState('');
 
   useEffect(() => {
-    if (data) {
+    if (data && data.workouts) {
       const currentIdx = data.next_workout_idx % data.workouts.length;
       setActualWorkout(data.workouts[currentIdx]);
     }
+  }, [data]);
+
+  const upcomingWorkouts = useMemo(() => {
+      if (!data || !data.workouts) return [];
+      let upcoming = [];
+      let idx = data.next_workout_idx || 0;
+      for(let i=0; i<3; i++) {
+          upcoming.push(data.workouts[idx % data.workouts.length]);
+          idx++;
+      }
+      return upcoming;
   }, [data]);
 
   const getTodayStr = () => {
@@ -55,7 +66,7 @@ export default function TodayScreen() {
     newData.next_workout_idx = (newData.next_workout_idx + 1) % workoutsList.length;
     
     await saveData(newData);
-    Alert.alert("Tebrikler", "Antrenman başarıyla tamamlandı!");
+    Alert.alert("Tebrikler!", "Antrenman başarıyla tamamlandı!");
   };
 
   const handleDelay = async () => {
@@ -65,7 +76,7 @@ export default function TodayScreen() {
     newData.expected_next_date = addDays(today, 1);
     newData.streak = 0;
     await saveData(newData);
-    Alert.alert("Ertelendi", "Antrenman yarına kaydırıldı.");
+    Alert.alert("Ertelendi", "Antrenman yarına kaydırıldı. Yarın mutlaka telafi et!");
   };
 
   if (loading || !data) {
@@ -76,13 +87,20 @@ export default function TodayScreen() {
   const isCompletedToday = data.last_completed_date === todayStr;
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>💪 Fitness Takip</Text>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       
+      <View style={styles.greetingCard}>
+          <Text style={styles.greetingTitle}>Merhaba Şampiyon! 🏆</Text>
+          <Text style={styles.greetingSub}>Bugün spor yapmak için harika bir gün.</Text>
+      </View>
+
       <View style={styles.card}>
         <Text style={styles.cardTitle}>🏋️ Bugünün Antrenmanı</Text>
         {isCompletedToday ? (
-          <Text style={styles.successText}>Bugünkü antrenmanı tamamladınız! Harika iş çıkardınız.</Text>
+          <View style={{alignItems: 'center', paddingVertical: 10}}>
+             <Text style={styles.successText}>Bugünkü antrenmanı tamamladınız!</Text>
+             <Text style={{color: '#666', marginTop: 5}}>Dinlenmenin tadını çıkarın. 🛋️</Text>
+          </View>
         ) : (
           <View>
             <Text style={styles.label}>Planlanan veya Yaptığınız İdman:</Text>
@@ -102,6 +120,20 @@ export default function TodayScreen() {
           </View>
         )}
       </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>🔮 Sıradaki Antrenmanlar</Text>
+        <Text style={styles.label}>Önümüzdeki 3 antrenman planınız:</Text>
+        <View style={styles.upcomingRow}>
+            {upcomingWorkouts.map((w, i) => (
+                <View key={i} style={styles.upcomingBadge}>
+                    <Text style={styles.upcomingNum}>{i+1}</Text>
+                    <Text style={styles.upcomingText}>{w}</Text>
+                </View>
+            ))}
+        </View>
+      </View>
+
     </ScrollView>
   );
 }
@@ -109,13 +141,19 @@ export default function TodayScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f0f2f5', padding: 16 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { fontSize: 24, fontWeight: 'bold', color: '#1a1a1a', marginBottom: 20, textAlign: 'center', marginTop: 10 },
+  greetingCard: { backgroundColor: '#4CAF50', borderRadius: 12, padding: 20, marginBottom: 16, marginTop: 10, elevation: 3 },
+  greetingTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff', marginBottom: 4 },
+  greetingSub: { fontSize: 14, color: '#e8f5e9' },
   card: { backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 16, elevation: 2 },
   cardTitle: { fontSize: 20, fontWeight: '600', marginBottom: 12, color: '#333' },
-  label: { fontSize: 14, color: '#555', marginBottom: 8 },
-  successText: { fontSize: 16, color: '#4CAF50', fontWeight: 'bold' },
+  label: { fontSize: 14, color: '#555', marginBottom: 12 },
+  successText: { fontSize: 18, color: '#4CAF50', fontWeight: 'bold', textAlign: 'center' },
   pickerContainer: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, marginBottom: 16, backgroundColor: '#fafafa' },
   btnSuccess: { backgroundColor: '#4CAF50', padding: 14, borderRadius: 8, alignItems: 'center', marginBottom: 12 },
   btnWarning: { backgroundColor: '#ff9800', padding: 14, borderRadius: 8, alignItems: 'center' },
   btnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  upcomingRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 },
+  upcomingBadge: { flex: 1, backgroundColor: '#e3f2fd', marginHorizontal: 4, borderRadius: 8, padding: 10, alignItems: 'center', borderWidth: 1, borderColor: '#90caf9' },
+  upcomingNum: { fontSize: 12, color: '#1976d2', fontWeight: 'bold', marginBottom: 4 },
+  upcomingText: { fontSize: 14, color: '#1565c0', fontWeight: 'bold', textAlign: 'center' }
 });
