@@ -6,19 +6,11 @@ WORKOUTS = ["push", "pull", "leg", "upper", "lower", "v-sit", "muscle up"]
 def create_schedule(start_date, days=30):
     schedule = []
     workout_index = 0
-    consecutive_workout_days = 0
+    end_date = start_date + datetime.timedelta(days=days)
+    current_date = start_date
 
-    for i in range(days):
-        current_date = start_date + datetime.timedelta(days=i)
-        
-        if consecutive_workout_days == 2:
-            consecutive_workout_days = 0
-            # Dinlenme günü
-            continue
-            
+    while current_date < end_date:
         workout_name = WORKOUTS[workout_index % len(WORKOUTS)]
-        workout_index += 1
-        consecutive_workout_days += 1
         
         # Saatleri ayarlama (0 = Pazartesi, 6 = Pazar)
         if current_date.weekday() < 5:  # Hafta içi
@@ -35,6 +27,13 @@ def create_schedule(start_date, days=30):
             "end": end_datetime.isoformat(),
             "date": current_date
         })
+        
+        if (workout_index % len(WORKOUTS)) in [1, 3, 6]:
+            current_date += datetime.timedelta(days=2)
+        else:
+            current_date += datetime.timedelta(days=1)
+            
+        workout_index += 1
         
     return schedule
 
