@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react';
+﻿import React, { useContext, useMemo } from 'react';
 import { StyleSheet, Text, View, ScrollView, ActivityIndicator } from 'react-native';
 import { DataContext } from '../../contexts/DataContext';
 
@@ -41,33 +41,33 @@ export default function StatsScreen() {
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>🔥 Streak (Seri)</Text>
-        <Text style={styles.statValue}>{data.streak || 0} Gün</Text>
-        <Text style={styles.statSub}>Rekor: {data.max_streak || 0} Gün</Text>
+        <Text style={styles.cardTitle}>ğŸ”¥ Streak (Seri)</Text>
+        <Text style={styles.statValue}>{data.streak || 0} GÃ¼n</Text>
+        <Text style={styles.statSub}>Rekor: {data.max_streak || 0} GÃ¼n</Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>📊 Başarı Oranları</Text>
+        <Text style={styles.cardTitle}>ğŸ“Š BaÅŸarÄ± OranlarÄ±</Text>
         
-        <Text style={styles.subTitle}>Son 30 Gün</Text>
-        <Text style={styles.desc}>Tamamlanan: {stats.comp30} | Kaçırılan: {stats.miss30}</Text>
+        <Text style={styles.subTitle}>Son 30 GÃ¼n</Text>
+        <Text style={styles.desc}>Tamamlanan: {stats.comp30} | KaÃ§Ä±rÄ±lan: {stats.miss30}</Text>
         <View style={styles.progressBarBg}>
-            <View style={[styles.progressBarFill, {width: ${stats.rate30}%}]} />
+            <View style={[styles.progressBarFill, {width: `${stats.rate30}%`}]} />
         </View>
-        <Text style={styles.progressText}>Başarı: %{stats.rate30}</Text>
+        <Text style={styles.progressText}>BaÅŸarÄ±: %{stats.rate30}</Text>
 
-        <Text style={[styles.subTitle, {marginTop: 16}]}>Son 1 Yıl</Text>
-        <Text style={styles.desc}>Tamamlanan: {stats.comp365} | Kaçırılan: {stats.miss365}</Text>
+        <Text style={[styles.subTitle, {marginTop: 16}]}>Son 1 YÄ±l</Text>
+        <Text style={styles.desc}>Tamamlanan: {stats.comp365} | KaÃ§Ä±rÄ±lan: {stats.miss365}</Text>
         <View style={styles.progressBarBg}>
-            <View style={[styles.progressBarFill, {width: ${stats.rate365}%}]} />
+            <View style={[styles.progressBarFill, {width: `${stats.rate365}%`}]} />
         </View>
-        <Text style={styles.progressText}>Başarı: %{stats.rate365}</Text>
+        <Text style={styles.progressText}>BaÅŸarÄ±: %{stats.rate365}</Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>📚 Son 10 İdman</Text>
+        <Text style={styles.cardTitle}>ğŸ“š Son 10 Ä°dman</Text>
         {recentHistory.length === 0 ? (
-          <Text style={styles.desc}>Henüz tamamlanmış idman yok.</Text>
+          <Text style={styles.desc}>HenÃ¼z tamamlanmÄ±ÅŸ idman yok.</Text>
         ) : (
           recentHistory.map((h, i) => (
             <View key={i} style={styles.historyRow}>
