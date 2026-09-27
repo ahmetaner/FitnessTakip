@@ -8,8 +8,8 @@ export default function TabLayout() {
       tabBarStyle: { paddingBottom: 5, height: 60 }
     }}>
       <Tabs.Screen name="index" options={{ 
-        title: 'Bugün', 
-        tabBarIcon: ({color}) => <Text style={{fontSize: 20}}>📅</Text> 
+        title: 'Özet', 
+        tabBarIcon: ({color}) => <Text style={{fontSize: 20}}>🏠</Text> 
       }} />
       <Tabs.Screen name="calendar" options={{ 
         title: 'Takvim', 
@@ -18,10 +18,6 @@ export default function TabLayout() {
       <Tabs.Screen name="cycle" options={{ 
         title: 'Döngü', 
         tabBarIcon: ({color}) => <Text style={{fontSize: 20}}>🔁</Text> 
-      }} />
-      <Tabs.Screen name="stats" options={{ 
-        title: 'Geçmiş', 
-        tabBarIcon: ({color}) => <Text style={{fontSize: 20}}>🔥</Text> 
       }} />
     </Tabs>
   );

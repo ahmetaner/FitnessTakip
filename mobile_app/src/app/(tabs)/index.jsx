@@ -1,9 +1,9 @@
 import React, { useContext, useState, useEffect, useMemo } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Image } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { DataContext } from '../../contexts/DataContext';
 
-export default function TodayScreen() {
+export default function DashboardScreen() {
   const { data, loading, saveData } = useContext(DataContext);
   const [actualWorkout, setActualWorkout] = useState('');
 
@@ -25,6 +25,28 @@ export default function TodayScreen() {
       return upcoming;
   }, [data]);
 
+  const stats = useMemo(() => {
+    if (!data) return { comp30: 0, miss30: 0, rate30: 0, comp365: 0, miss365: 0, rate365: 0 };
+    const today = new Date();
+    const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(today.getDate() - 30);
+    const oneYearAgo = new Date(); oneYearAgo.setDate(today.getDate() - 365);
+
+    const compHistory = data.completed_history || [];
+    const missHistory = data.missed_history || [];
+
+    const comp30 = compHistory.filter(h => new Date(h.date) >= thirtyDaysAgo).length;
+    const miss30 = missHistory.filter(h => new Date(h.date) >= thirtyDaysAgo).length;
+    const total30 = comp30 + miss30;
+    const rate30 = total30 > 0 ? Math.round((comp30 / total30) * 100) : 0;
+
+    const comp365 = compHistory.filter(h => new Date(h.date) >= oneYearAgo).length;
+    const miss365 = missHistory.filter(h => new Date(h.date) >= oneYearAgo).length;
+    const total365 = comp365 + miss365;
+    const rate365 = total365 > 0 ? Math.round((comp365 / total365) * 100) : 0;
+
+    return { comp30, miss30, rate30, comp365, miss365, rate365 };
+  }, [data]);
+
   const getTodayStr = () => {
     const today = new Date();
     return new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
@@ -43,7 +65,6 @@ export default function TodayScreen() {
     
     newData.streak = (newData.streak || 0) + 1;
     if (newData.streak > (newData.max_streak || 0)) newData.max_streak = newData.streak;
-    
     newData.last_completed_date = today;
     if (!newData.completed_history) newData.completed_history = [];
     newData.completed_history.push({ title: 'Antrenman: ' + actualWorkout, date: today });
@@ -60,7 +81,6 @@ export default function TodayScreen() {
       }
     }
     newData.workouts = workoutsList;
-    
     const currMod = newData.next_workout_idx % workoutsList.length;
     newData.expected_next_date = addDays(today, [1, 3, 6].includes(currMod) ? 2 : 1);
     newData.next_workout_idx = (newData.next_workout_idx + 1) % workoutsList.length;
@@ -85,6 +105,8 @@ export default function TodayScreen() {
 
   const todayStr = getTodayStr();
   const isCompletedToday = data.last_completed_date === todayStr;
+  const history = data.completed_history || [];
+  const recentHistory = [...history].reverse().slice(0, 5);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -92,6 +114,17 @@ export default function TodayScreen() {
       <View style={styles.greetingCard}>
           <Text style={styles.greetingTitle}>Merhaba Şampiyon! 🏆</Text>
           <Text style={styles.greetingSub}>Bugün spor yapmak için harika bir gün.</Text>
+      </View>
+
+      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+        <View style={[styles.card, {flex: 1, marginRight: 8, alignItems: 'center'}]}>
+          <Text style={styles.cardTitle}>🔥 Seri</Text>
+          <Text style={styles.statValue}>{data.streak || 0} Gün</Text>
+        </View>
+        <View style={[styles.card, {flex: 1, marginLeft: 8, alignItems: 'center'}]}>
+          <Text style={styles.cardTitle}>🏅 Rekor</Text>
+          <Text style={[styles.statValue, {color: '#2196F3'}]}>{data.max_streak || 0} Gün</Text>
+        </View>
       </View>
 
       <View style={styles.card}>
@@ -122,8 +155,24 @@ export default function TodayScreen() {
       </View>
 
       <View style={styles.card}>
+        <Text style={styles.cardTitle}>📊 Başarı Oranları</Text>
+        <Text style={styles.subTitle}>Son 30 Gün</Text>
+        <Text style={styles.desc}>Tamamlanan: {stats.comp30} | Kaçırılan: {stats.miss30}</Text>
+        <View style={styles.progressBarBg}>
+            <View style={[styles.progressBarFill, {width: `${stats.rate30}%`}]} />
+        </View>
+        <Text style={styles.progressText}>Başarı: %{stats.rate30}</Text>
+
+        <Text style={[styles.subTitle, {marginTop: 16}]}>Son 1 Yıl</Text>
+        <Text style={styles.desc}>Tamamlanan: {stats.comp365} | Kaçırılan: {stats.miss365}</Text>
+        <View style={styles.progressBarBg}>
+            <View style={[styles.progressBarFill, {width: `${stats.rate365}%`}]} />
+        </View>
+        <Text style={styles.progressText}>Başarı: %{stats.rate365}</Text>
+      </View>
+
+      <View style={styles.card}>
         <Text style={styles.cardTitle}>🔮 Sıradaki Antrenmanlar</Text>
-        <Text style={styles.label}>Önümüzdeki 4 antrenman planınız:</Text>
         <View style={styles.upcomingRow}>
             {upcomingWorkouts.map((w, i) => (
                 <View key={i} style={styles.upcomingBadge}>
@@ -132,6 +181,20 @@ export default function TodayScreen() {
                 </View>
             ))}
         </View>
+      </View>
+      
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>📚 Son 5 İdman</Text>
+        {recentHistory.length === 0 ? (
+          <Text style={styles.desc}>Henüz tamamlanmış idman yok.</Text>
+        ) : (
+          recentHistory.map((h, i) => (
+            <View key={i} style={styles.historyRow}>
+              <Text style={styles.historyTitle}>{h.title.replace('Antrenman: ', '')}</Text>
+              <Text style={styles.historyDate}>{h.date}</Text>
+            </View>
+          ))
+        )}
       </View>
 
     </ScrollView>
@@ -155,5 +218,14 @@ const styles = StyleSheet.create({
   upcomingRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 },
   upcomingBadge: { flex: 1, backgroundColor: '#e3f2fd', marginHorizontal: 4, borderRadius: 8, padding: 10, alignItems: 'center', borderWidth: 1, borderColor: '#90caf9' },
   upcomingNum: { fontSize: 12, color: '#1976d2', fontWeight: 'bold', marginBottom: 4 },
-  upcomingText: { fontSize: 14, color: '#1565c0', fontWeight: 'bold', textAlign: 'center' }
+  upcomingText: { fontSize: 14, color: '#1565c0', fontWeight: 'bold', textAlign: 'center' },
+  statValue: { fontSize: 28, fontWeight: 'bold', color: '#ff4b4b' },
+  subTitle: { fontSize: 16, fontWeight: 'bold', color: '#444', marginBottom: 4 },
+  desc: { fontSize: 14, color: '#666', marginBottom: 8 },
+  progressBarBg: { height: 12, backgroundColor: '#eee', borderRadius: 6, overflow: 'hidden', marginVertical: 4 },
+  progressBarFill: { height: '100%', backgroundColor: '#4CAF50', borderRadius: 6 },
+  progressText: { fontSize: 12, color: '#4CAF50', fontWeight: 'bold', textAlign: 'right' },
+  historyRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#eee' },
+  historyTitle: { fontSize: 16, color: '#333', fontWeight: '500' },
+  historyDate: { fontSize: 14, color: '#888' },
 });
