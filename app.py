@@ -198,13 +198,20 @@ def main():
         st.subheader(f"🏋️ Bugünün Antrenmanı")
         is_completed_today = data.get("last_completed_date") == today.isoformat()
         if not is_completed_today:
-            actual_workout = st.text_input("Bugün planlanan antrenman (Farklı bir idman yaptıysanız değiştirebilirsiniz):", value=todays_workout['title'].replace("Antrenman: ", ""))
+            current_idx = data["next_workout_idx"] % len(workouts_list)
+            scheduled_name = workouts_list[current_idx]
+            actual_workout = st.selectbox("Bugün planlanan antrenman (Farklı bir idman seçerseniz, bugünkü ile yer değiştirir):", options=workouts_list, index=current_idx)
             if st.button("✅ Antrenmanı Tamamla (Streak +1)", use_container_width=True):
                 data["streak"] += 1
                 if data["streak"] > data.get("max_streak", 0):
                     data["max_streak"] = data["streak"]
                 data["last_completed_date"] = today.isoformat()
                 data["completed_history"].append({"title": f"Antrenman: {actual_workout}", "date": today.isoformat()})
+
+                if actual_workout != scheduled_name:
+                    swap_idx = workouts_list.index(actual_workout)
+                    workouts_list[current_idx], workouts_list[swap_idx] = workouts_list[swap_idx], workouts_list[current_idx]
+                    data["workouts"] = workouts_list
 
                 curr_mod = data["next_workout_idx"] % len(workouts_list)
                 if curr_mod in [1, 3, 6]:
