@@ -1,9 +1,7 @@
 import datetime
 import uuid
 
-WORKOUTS = [
-    "Gün 1", "Gün 2", "V-sit", "Gün 3", "Gün 4", "Front Lever", "Gün 5", "Muscle-up"
-]
+WORKOUTS = ["push", "pull", "leg", "upper", "lower", "v-sit", "muscle up"]
 
 def create_schedule(start_date, days=30):
     schedule = []

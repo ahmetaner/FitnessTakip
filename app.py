@@ -11,7 +11,7 @@ from googleapiclient.errors import HttpError
 
 DATA_FILE = "data.json"
 SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
-WORKOUTS = ["Gün 1", "Gün 2", "V-sit", "Gün 3", "Gün 4", "Front Lever", "Yüzme", "Muscle-up"]
+WORKOUTS = ["push", "pull", "leg", "upper", "lower", "v-sit", "muscle up"]
 
 st.set_page_config(page_title="Fitness Tracker", page_icon="💪", layout="wide")
 
