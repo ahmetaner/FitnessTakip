@@ -296,6 +296,22 @@ def main():
     }
     
     calendar(events=calendar_events, options=calendar_options)
+    
+    st.markdown("---")
+    st.subheader("🗓️ Mevcut İdman Döngüsü (12 Günlük Plan)")
+    st.write("Döngünüz **2 Gün İdman, 1 Gün Dinlenme** kuralına göre aşağıdaki gibi 12 günde bir başa sarar:")
+    
+    cycle_cols = st.columns(4)
+    day = 1
+    w_idx = 0
+    for i in range(12):
+        col = cycle_cols[i % 4]
+        if i % 3 == 2:
+            col.info(f"**Gün {day}**: 🛋️ Dinlenme")
+        else:
+            col.success(f"**Gün {day}**: 🏋️ {WORKOUTS[w_idx % len(WORKOUTS)]}")
+            w_idx += 1
+        day += 1
 
 if __name__ == "__main__":
     main()
