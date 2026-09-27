@@ -11,7 +11,6 @@ from googleapiclient.errors import HttpError
 
 DATA_FILE = "data.json"
 SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
-WORKOUTS = ["push", "pull", "leg", "upper", "lower", "v-sit", "muscle up"]
 
 st.set_page_config(page_title="Fitness Tracker", page_icon="💪", layout="wide")
 
@@ -90,7 +89,7 @@ def auto_sync_to_google(schedule):
     except Exception as e:
         return False
 
-def generate_future_schedule(start_date_str, next_workout_idx, days=90):
+def generate_future_schedule(start_date_str, next_workout_idx, workouts_list, days=90):
     schedule = []
     current_date = datetime.date.fromisoformat(start_date_str)
     idx = next_workout_idx
@@ -102,7 +101,7 @@ def generate_future_schedule(start_date_str, next_workout_idx, days=90):
     end_date = today + datetime.timedelta(days=days)
     
     while current_date <= end_date:
-        workout_name = WORKOUTS[idx % len(WORKOUTS)]
+        workout_name = workouts_list[idx % len(workouts_list)]
         
         if current_date.weekday() < 5:
             start_hour, start_minute = 21, 0
@@ -118,10 +117,10 @@ def generate_future_schedule(start_date_str, next_workout_idx, days=90):
             "end": end_datetime.isoformat(),
             "backgroundColor": "#FF4B4B" if current_date == today else "#4CAF50",
             "date_obj": current_date,
-            "idx": idx % len(WORKOUTS)
+            "idx": idx % len(workouts_list)
         })
         
-        if (idx % len(WORKOUTS)) in [1, 3, 6]:
+        if (idx % len(workouts_list)) in [1, 3, 6]:
             current_date += datetime.timedelta(days=2)
         else:
             current_date += datetime.timedelta(days=1)
@@ -133,6 +132,7 @@ def generate_future_schedule(start_date_str, next_workout_idx, days=90):
 def main():
     data = load_data()
     today = datetime.date.today()
+    workouts_list = data.get("workouts", ["push", "pull", "leg", "upper", "lower", "v-sit", "muscle up"])
     
     st.title("💪 Fitness Takip ve Takvim Uygulaması")
     
@@ -154,12 +154,12 @@ def main():
                 data["streak"] += 1
                 if data["streak"] > data.get("max_streak", 0):
                     data["max_streak"] = data["streak"]
-                curr_mod = data["next_workout_idx"] % len(WORKOUTS)
+                curr_mod = data["next_workout_idx"] % len(workouts_list)
                 if curr_mod in [1, 3, 6]:
                     data["expected_next_date"] = (expected_next + datetime.timedelta(days=2)).isoformat()
                 else:
                     data["expected_next_date"] = (expected_next + datetime.timedelta(days=1)).isoformat()
-                data["next_workout_idx"] = (data["next_workout_idx"] + 1) % len(WORKOUTS)
+                data["next_workout_idx"] = (data["next_workout_idx"] + 1) % len(workouts_list)
                 save_data(data)
                 st.rerun()
         with col_n:
@@ -169,7 +169,7 @@ def main():
                 
                 data["streak"] = 0
                 save_data(data)
-                new_schedule = generate_future_schedule(data["expected_next_date"], data["next_workout_idx"])
+                new_schedule = generate_future_schedule(data["expected_next_date"], data["next_workout_idx"], workouts_list)
                 if os.path.exists("credentials.json"):
                     auto_sync_to_google(new_schedule)
                 st.rerun()
@@ -184,35 +184,37 @@ def main():
     with col3:
         if st.button("🔄 Google Takvim ile Senkronize Et", use_container_width=True):
             with st.spinner("Takvim güncelleniyor..."):
-                schedule = generate_future_schedule(data["expected_next_date"], data["next_workout_idx"])
+                schedule = generate_future_schedule(data["expected_next_date"], data["next_workout_idx"], workouts_list)
                 if auto_sync_to_google(schedule):
                     st.success("Başarılı!")
                 else:
                     st.error("credentials.json bulunamadı veya yetkilendirme hatası.")
                     
-    schedule = generate_future_schedule(data["expected_next_date"], data["next_workout_idx"])
+    schedule = generate_future_schedule(data["expected_next_date"], data["next_workout_idx"], workouts_list)
     todays_workout = next((ev for ev in schedule if ev["date_obj"] == today), None)
     
     st.markdown("---")
     if todays_workout:
-        st.subheader(f"📅 Bugünün Antrenmanı: {todays_workout['title']}")
+        st.subheader(f"🏋️ Bugünün Antrenmanı")
         is_completed_today = data.get("last_completed_date") == today.isoformat()
         if not is_completed_today:
+            actual_workout = st.text_input("Bugün planlanan antrenman (Farklı bir idman yaptıysanız değiştirebilirsiniz):", value=todays_workout['title'].replace("Antrenman: ", ""))
             if st.button("✅ Antrenmanı Tamamla (Streak +1)", use_container_width=True):
                 data["streak"] += 1
                 if data["streak"] > data.get("max_streak", 0):
                     data["max_streak"] = data["streak"]
                 data["last_completed_date"] = today.isoformat()
-                data["completed_history"].append({"title": todays_workout['title'], "date": today.isoformat()})
-                curr_mod = data["next_workout_idx"] % len(WORKOUTS)
+                data["completed_history"].append({"title": f"Antrenman: {actual_workout}", "date": today.isoformat()})
+
+                curr_mod = data["next_workout_idx"] % len(workouts_list)
                 if curr_mod in [1, 3, 6]:
                     data["expected_next_date"] = (today + datetime.timedelta(days=2)).isoformat()
                 else:
                     data["expected_next_date"] = (today + datetime.timedelta(days=1)).isoformat()
-                data["next_workout_idx"] = (data["next_workout_idx"] + 1) % len(WORKOUTS)
+                data["next_workout_idx"] = (data["next_workout_idx"] + 1) % len(workouts_list)
                 save_data(data)
                 
-                new_schedule = generate_future_schedule(data["expected_next_date"], data["next_workout_idx"])
+                new_schedule = generate_future_schedule(data["expected_next_date"], data["next_workout_idx"], workouts_list)
                 if os.path.exists("credentials.json"):
                     auto_sync_to_google(new_schedule)
                 st.rerun()
@@ -229,7 +231,7 @@ def main():
             
             data["streak"] = 0
             save_data(data)
-            new_schedule = generate_future_schedule(data["expected_next_date"], data["next_workout_idx"])
+            new_schedule = generate_future_schedule(data["expected_next_date"], data["next_workout_idx"], workouts_list)
             if os.path.exists("credentials.json"):
                 auto_sync_to_google(new_schedule)
             st.rerun()
@@ -295,6 +297,23 @@ def main():
     calendar(events=calendar_events, options=calendar_options)
     
     st.markdown("---")
+    st.markdown("---")
+    with st.expander("🛠️ Programı Düzenle (Antrenman Sıralamasını Değiştir)"):
+        st.write("Döngünüzdeki 7 antrenmanın ismini veya sırasını tablodan düzenleyebilirsiniz:")
+        
+        list_of_dicts = [{"Antrenman Adı": w} for w in workouts_list]
+        edited_data = st.data_editor(list_of_dicts, use_container_width=True, num_rows="fixed")
+        new_workouts = [item["Antrenman Adı"] for item in edited_data]
+        
+        if new_workouts != workouts_list:
+            if st.button("💾 Döngüyü Güncelle"):
+                data["workouts"] = new_workouts
+                save_data(data)
+                new_schedule = generate_future_schedule(data["expected_next_date"], data["next_workout_idx"], new_workouts)
+                if os.path.exists("credentials.json"):
+                    auto_sync_to_google(new_schedule)
+                st.rerun()
+
     st.subheader("🗓️ Mevcut İdman Döngüsü (10 Günlük Plan)")
     st.write("Döngünüz **2 idman-1 dinlenme, 2 idman-1 dinlenme, 3 idman-1 dinlenme** kuralına göre aşağıdaki gibi tam 10 günde bir başa sarar:")
     
@@ -308,7 +327,7 @@ def main():
         if i in [2, 5, 9]:
             col.info(f"**Gün {day}**\n\n🛋️ Dinlenme")
         else:
-            col.success(f"**Gün {day}**\n\n🏋️ {WORKOUTS[w_idx % len(WORKOUTS)]}")
+            col.success(f"**Gün {day}**\n\n🏋️ {workouts_list[w_idx % len(workouts_list)]}")
             w_idx += 1
 
 
