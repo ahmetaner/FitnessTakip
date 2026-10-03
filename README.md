@@ -1,46 +1,50 @@
-# Fitness Takip Projesi 🏋️‍♂️📱
+# Fitness Takip Projesi 💪
 
-Bu proje, kişisel antrenman programınızı ve istatistiklerinizi hem bilgisayardan (web) hem de cebinizden (mobil) eşzamanlı olarak takip edebilmeniz için geliştirilmiş uçtan uca modern bir sistemdir.
+Bu proje, kişisel antrenman programınızı ve istatistiklerinizi hem bilgisayardan (web) hem de cebinizden (mobil) eşzamanlı olarak takip edebilmeniz için geliştirilmiş **tamamen bulut tabanlı**, uçtan uca modern bir sistemdir.
 
 ## 🏗️ Proje Mimarisi
 
-Sistem 3 ana bileşenden oluşmaktadır ve tüm verileriniz merkezi tek bir beyin olan data.json dosyasında tutulur. Bu sayede hiçbir senkronizasyon sorunu yaşanmaz:
+Sistem, önceki yerel (Streamlit/FastAPI) versiyonundan tamamen kurtarılarak **PythonAnywhere** bulut sunucusuna taşınmıştır. Cihazlarınız bilgisayarınıza bağımlı kalmadan 7/24 bulut ile haberleşir:
 
-1. **Web Dashboard (Streamlit - pp.py):** Bilgisayarınız üzerinden tüm istatistiklerinizi görebileceğiniz, programı yönetebileceğiniz ve döngünüzü düzenleyebileceğiniz zengin masaüstü arayüzü.
-2. **Yerel API Sunucusu (FastAPI - pi.py):** Mobil uygulamanın bilgisayarınızdaki data.json dosyasına yerel ağ (Wi-Fi) üzerinden güvenle erişip verileri okuma/yazma yapmasını sağlayan köprü sistem.
-3. **Mobil Uygulama (React Native Expo - mobile_app/):** Telefonunuzdan idmanlarınızı anlık olarak işaretleyebileceğiniz, serinizi (streak) ve ilerlemenizi görebileceğiniz son derece şık ve "Hepsi Bir Arada" sekme yapısına sahip mobil arayüz.
+1. **Bulut API ve Web Dashboard (Flask + Tailwind CSS):** 
+   - `flask_app.py` üzerinden çalışan ve PythonAnywhere üzerinde barındırılan ana omurgadır.
+   - Bilgisayardan veya telefondan tarayıcı ile girildiğinde modern, hızlı ve Tailwind ile tasarlanmış zengin bir web arayüzü sunar (İstatistikler, FullCalendar entegrasyonu, antrenman döngüsü yönetimi).
+   - Aynı zamanda `/api/data` uç noktası (endpoint) üzerinden mobil uygulamaya JSON formatında veri sağlar.
+2. **Mobil Uygulama (React Native Expo - `mobile_app/`):** 
+   - Expo Router sekme (tab) yapısıyla tasarlanmış, şık ve performanslı mobil uygulamadır.
+   - İnternet üzerinden (PythonAnywhere API'si aracılığıyla) doğrudan buluttaki `data.json` verinize okuma/yazma yapar.
+   - EAS Build ile `.apk` formatında derlenip telefona bağımsız bir uygulama olarak kurulabilir.
 
-## ✨ Temel Özellikler
+## 🚀 Temel Özellikler
 
-* **Algoritmik 10 Günlük Döngü:** Belirlediğiniz 7 antrenman günü, bilimsel bir yaklaşımla (2 idman, 1 dinlenme, 2 idman, 1 dinlenme, 3 idman, 1 dinlenme) otomatik olarak 10 günlük dinlenme planına yayılır.
+* **Algoritmik 10 Günlük Döngü:** Belirlediğiniz 7 antrenman günü, otomatik olarak hesaplanan dinlenme günleriyle birlikte 10 günlük dinlenme planına yayılır.
 * **Modüler Düzenleme:** Antrenman sıralamanızı ve isimlerini her iki platformdan da dilediğiniz gibi güncelleyebilirsiniz.
 * **Akıllı Takas (Swap) Sistemi:** Eğer o gün programdaki idman yerine döngüdeki başka bir idmanı yaparsanız (örneğin göğüs yerine bacak), sistem bu iki idmanın yerini otomatik olarak değiştirerek gelecek planınızı korur.
 * **İstatistik ve Motivasyon:** Seriniz (Streak), en uzun seriniz (Rekor), son 30 günlük ve son 1 yıllık başarı oranlarınız yüzdelik ilerleme çubuklarıyla tutulur.
-* **Gelişmiş Takvim:** Yeşil (tamamlanan) ve Kırmızı Nokta (planlanan) işaretlemeleriyle geçmiş ve gelecek idman programınızı takvim üzerinden anlık görebilirsiniz.
+* **Bulut Senkronizasyonu:** Telefonunuzda yaptığınız bir değişiklik saniyesinde web sitenize, web sitenizde yaptığınız bir değişiklik saniyesinde mobil uygulamanıza yansır.
 
-## 🚀 Kurulum ve Çalıştırma
+## ⚙️ Kurulum ve Çalıştırma
 
-### 1. Web Uygulamasını Çalıştırma (Bilgisayar İçin)
-Uygulama dizinindeyken terminalinizde aşağıdaki komutu çalıştırarak masaüstü arayüzüne ulaşabilirsiniz:
-`ash
-streamlit run app.py
-`
+### 1. Web Sürümü (Bulut Kullanımı)
+Uygulama artık yerel bir sunucu gerektirmez. Herhangi bir cihazın tarayıcısından direkt olarak kendi PythonAnywhere adresinize girerek uygulamayı kullanabilirsiniz:
+`http://KULLANICI_ADINIZ.pythonanywhere.com`
 
-### 2. API Sunucusunu Çalıştırma (Mobil Uygulamanın Veri Alabilmesi İçin)
-Mobil uygulamanın bilgisayarınızdaki verileri çekebilmesi için arka planda köprü API'sini başlatmanız gerekir:
-`ash
-python api.py
-`
-*(Sunucu yerel ağınızda 8000 portu üzerinden yayın yapmaya başlayacaktır).*
+> **Not (PWA):** Bu adresi telefonunuzun tarayıcısından açıp "Ana Ekrana Ekle" seçeneğiyle doğrudan bir mobil uygulama gibi (PWA) tam ekran kullanabilirsiniz.
 
-### 3. Mobil Uygulamayı Çalıştırma (Telefon İçin)
-Terminalde yeni bir sekme açıp mobil uygulama klasörüne girin ve projeyi başlatın:
-`ash
+### 2. Mobil Uygulama Geliştirme ve Test (Expo Go)
+Mobil uygulama üzerinde geliştirme yapmak veya yerelde test etmek isterseniz:
+```bash
 cd mobile_app
-npm start
-`
-*(Alternatif olarak 
-pm.cmd start yazabilirsiniz).*
+npm install
+npx expo start -c
+```
+Ardından telefonunuzdaki **Expo Go** uygulaması ile QR kodu okutabilirsiniz. Uygulama verileri doğrudan PythonAnywhere bulut sunucusundan çekecektir.
 
-Ardından Android telefonunuza kurduğunuz **Expo Go** uygulaması ile bilgisayar ekranınızda çıkan QR kodu okutmanız yeterlidir. 
-**Önemli Not:** Telefonunuzun ve bilgisayarınızın aynı Wi-Fi ağına bağlı olması gerekmektedir.
+### 3. Mobil Uygulamayı Pakete (APK) Dönüştürme
+Uygulamayı mağaza kalitesinde bir Android APK dosyasına dönüştürmek için:
+```bash
+cd mobile_app
+npx eas-cli login
+npx eas-cli build -p android --profile preview
+```
+İşlem tamamlandığında terminalin size vereceği linkten `.apk` dosyanızı indirip telefonunuza kalıcı olarak kurabilirsiniz.
