@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Alert } from 'react-native';
 
 export const DataContext = createContext();
-const API_URL = 'http://192.168.0.12:8000/api/data';
+const API_URL = 'https://ahmetTaner.pythonanywhere.com/api/data';
 
 export const DataProvider = ({ children }) => {
   const [data, setData] = useState(null);
@@ -21,7 +21,7 @@ export const DataProvider = ({ children }) => {
       setLoading(false);
     } catch (error) {
       console.error(error);
-      Alert.alert("Hata", "Veri alınamadı. api.py çalışıyor mu?");
+      Alert.alert("Hata Detayı", "Bağlantı hatası: " + error.message + "\nURL: " + API_URL);
       setLoading(false);
     }
   };

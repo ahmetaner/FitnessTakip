@@ -1,9 +1,9 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 
-const API_URL = 'http://192.168.0.12:8000/api/data';
+const API_URL = 'https://ahmetTaner.pythonanywhere.com/api/data';
 
 export default function App() {
   const [data, setData] = useState(null);
